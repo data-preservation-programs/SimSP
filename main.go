@@ -1,24 +1,30 @@
 package main
 
 import (
-	"context"
 	"os"
 
+	"github.com/filecoin-project/go-address"
+	log "github.com/ipfs/go-log/v2"
 	"github.com/urfave/cli/v2"
 )
 
+func init() {
+	if os.Getenv("GOLOG_LOG_LEVEL") == "" {
+		os.Setenv("GOLOG_LOG_LEVEL", "info")
+	}
+	address.CurrentNetwork = address.Mainnet
+}
+
 func main() {
+	if log.GetConfig().Level > log.LevelInfo && os.Getenv("GOLOG_LOG_LEVEL") == "info" {
+		log.SetAllLoggers(log.LevelInfo)
+	}
 	app := &cli.App{
 		Name:  "sim-sp",
 		Usage: "Utility for simulating a storage provider",
 		Commands: []*cli.Command{
-			{
-				Name:  "run",
-				Usage: "Run the simulated storage provider",
-				Action: func(c *cli.Context) error {
-					return start(c.Context)
-				},
-			},
+			startCmd,
+			generatePeerCmd,
 		},
 	}
 
@@ -26,8 +32,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func start(ctx context.Context) error {
-	return nil
 }
