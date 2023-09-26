@@ -1,0 +1,44 @@
+#file: noinspection YAMLSchemaValidation
+builds:
+  - env:
+      - CGO_ENABLED=0
+    binary: sim-sp
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+      - 386
+    mod_timestamp: '{{.CommitTimestamp}}'
+
+archives:
+  - format_overrides:
+      - goos: windows
+        format: zip
+      - goos: darwin
+        format: zip
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_
+      {{- if eq .Os "darwin" }}mac_os
+      {{- else }}{{ .Os }}{{ end }}_{{ .Arch }}
+    files:
+      - LICENSE
+
+release:
+  mode: keep-existing
+changelog:
+  skip: true
+checksum:
+  disable: false
+nfpms:
+  - formats:
+      - deb
+      - rpm
+      - archlinux
+    vendor: Data Programs
+    homepage: https://github.com/data-preservation-programs/sim-sp
+    maintainer: Xinan Xu <xinan.xu@protocol.ai>
+    description: Simulated Storage Provider
+    license: MIT + Apache 2.0
