@@ -34,7 +34,7 @@ func yamuxTransport() network.Multiplexer {
 
 var startCmd = &cli.Command{
 	Name:  "run",
-	Usage: "Run the simulated storage provider",
+	Usage: "Run the simulated storage provider f02815405",
 	Flags: []cli.Flag{
 		&cli.StringSliceFlag{
 			Name:    "listen",
@@ -52,7 +52,7 @@ var startCmd = &cli.Command{
 		&cli.StringFlag{
 			Name:    "http",
 			Usage:   "HTTP bind address for serving HTTP retrieval",
-			Value:   ":7777",
+			Value:   ":7778",
 			EnvVars: []string{"SIM_SP_HTTP"},
 		},
 		&cli.PathFlag{
@@ -136,7 +136,7 @@ var startCmd = &cli.Command{
 			for {
 				select {
 				case deal := <-pendingDeals:
-					err := handleDeal(carDir, deal)
+					err := contentProvider.handleDeal(carDir, deal)
 					if err != nil {
 						logger.Errorf("Error handling deal: %v", err)
 					}
@@ -192,7 +192,7 @@ var startCmd = &cli.Command{
 	},
 }
 
-func handleDeal(carDir string, deal *boostly.DealParams) error {
+func (c *ContentProvider) handleDeal(carDir string, deal *boostly.DealParams) error {
 	logger.Infof("Working on deal %s", deal.DealUUID.String())
 	if deal.Transfer.Type != "http" {
 		return errors.Newf("unsupported transfer type: %s", deal.Transfer.Type)
@@ -240,6 +240,12 @@ func handleDeal(carDir string, deal *boostly.DealParams) error {
 
 	logger.Infof("Deal %s completed successfully", deal.DealUUID.String())
 
+	pieceCID := deal.ClientDealProposal.Proposal.PieceCID.String()
+	logger.Infof("Reading car file %s with piece CID %s", toName, pieceCID)
+	err = c.AddCar(pieceCID, filepath.Join(carDir, toName))
+	if err != nil {
+		return errors.Wrapf(err, "cannot add car file %s", toName)
+	}
 	return nil
 }
 
