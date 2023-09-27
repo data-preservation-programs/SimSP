@@ -10,7 +10,9 @@ import (
 	"strings"
 
 	"github.com/cockroachdb/errors"
+	"github.com/data-preservation-programs/sim-sp/model"
 	cborutil "github.com/filecoin-project/go-cbor-util"
+	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-shipyard/boostly"
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/libp2p/go-libp2p"
@@ -146,19 +148,39 @@ var startCmd = &cli.Command{
 			}
 		}()
 
+		httpPort := strings.Split(http, ":")[1]
+		httpAddr, err := multiaddr.NewMultiaddr("/ip4/127.0.0.1/tcp/" + httpPort + "/http")
+		if err != nil {
+			return errors.Wrap(err, "cannot create http multiaddr")
+		}
+		var bitswapAddrs []abi.Multiaddrs
+		for _, addr := range listen {
+			bitswapAddr, err := multiaddr.NewMultiaddr(addr)
+			if err != nil {
+				return errors.Wrap(err, "cannot create bitswap multiaddr")
+			}
+			bitswapAddrs = append(bitswapAddrs, bitswapAddr.Bytes())
+		}
 		host.SetStreamHandler(boostly.FilRetrievalTransportsProtocol_1_0_0, func(s network.Stream) {
 			logger.Infof("Received transport protocol request from %s", s.Conn().RemotePeer())
-			response := &boostly.TransportsQueryResponse{
-				Protocols: []struct {
-					Name      string                `json:"name,omitempty"`
-					Addresses []multiaddr.Multiaddr `json:"addresses,omitempty"`
-				}{},
+			response := &model.QueryResponse{
+				Protocols: []model.Protocol{
+					{
+						Name:      "http",
+						Addresses: []abi.Multiaddrs{httpAddr.Bytes()},
+					},
+					{
+						Name:      "bitswap",
+						Addresses: bitswapAddrs,
+					},
+				},
 			}
 
 			err = cborutil.WriteCborRPC(s, response)
 			if err != nil {
 				logger.Errorf("Error writing response: %v", err)
 			}
+			s.Close()
 		})
 
 		host.SetStreamHandler(boostly.FilStorageMarketProtocol_1_2_0, func(s network.Stream) {

@@ -18,7 +18,19 @@ It accepts all retrieval types, including
 It accepts bitswap retrieval but only if the block exists in downloaded CAR files.
 
 ### Retrieval Protocols
-Currently not implemented so it does not yet work with lassie or retrieval bot.
+The SP will return the corresponding retrieval protocols so it will work with
+```shell
+boost provider retrieval-transports f02815405
+lassie fetch --provider \
+  /ip4/127.0.0.1/tcp/24001/p2p/12D3KooWDeNSud283YaRmhqbZDynLNmtATBxjUPAUJxtPyEXXp9u \
+  --protocols http ...
+lassie fetch --provider \
+  /ip4/127.0.0.1/tcp/24001/p2p/12D3KooWDeNSud283YaRmhqbZDynLNmtATBxjUPAUJxtPyEXXp9u \
+  --protocols bitswap ...
+```
+
+### Index Announcement
+The provider does not make advertisements to IPNI.
 
 ## How to use it 
 ```shell
