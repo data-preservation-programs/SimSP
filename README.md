@@ -1,6 +1,6 @@
-# Simulated Storage Provider
+# Emulated Storage Provider
 
-This little software provides a simulated storage provider for demo purpose only.
+This little software provides an emulated storage provider for demo purpose only.
 
 ## Features
 ### Deal Proposal
@@ -18,7 +18,7 @@ It accepts all retrieval types, including
 It accepts bitswap retrieval but only if the block exists in downloaded CAR files.
 
 ### Retrieval Protocols
-The SP will return the corresponding retrieval protocols so it will work with
+The SP will return the corresponding retrieval protocols so below commands will work
 ```shell
 boost provider retrieval-transports f02815405
 lassie fetch --provider \
