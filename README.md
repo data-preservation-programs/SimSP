@@ -32,9 +32,14 @@ lassie fetch --provider \
 ### Index Announcement
 The provider does not make advertisements to IPNI.
 
+## How to install
+```shell
+go install github.com/data-preservation-programs/sim-sp@latest
+```
+
 ## How to use it 
 ```shell
-$ ./sim-sp run -h
+$ sim-sp run -h
 NAME:
    sim-sp run - Run the simulated storage provider f02815405
 
