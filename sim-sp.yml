@@ -44,7 +44,7 @@ services:
 
   motion:
     network_mode: host
-    entrypoint: motion --experimentalSingularityStore --experimentalRemoteSingularityAPIUrl=127.0.0.1:9090 --experimentalSingularityContentURLTemplate=${SINGULARITY_CONTENT_PROVIDER_DOMAIN:-http://127.0.0.1:7778}/piece/{PIECE_CID}
+    entrypoint: motion --experimentalSingularityStore --experimentalRemoteSingularityAPIUrl=127.0.0.1:9090 --experimentalSingularityContentURLTemplate=${SINGULARITY_CONTENT_PROVIDER_DOMAIN:-http://127.0.0.1:7778}/piece/{PIECE_CID} --singularityForcePackAfter=10s
 
   sim-sp:
     network_mode: host
