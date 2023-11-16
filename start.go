@@ -114,14 +114,29 @@ var startCmd = &cli.Command{
 			if entry.IsDir() {
 				continue
 			}
-			if !strings.HasSuffix(entry.Name(), ".car") {
-				continue
+			if strings.HasSuffix(entry.Name(), ".car") {
+				pieceCID := strings.TrimSuffix(entry.Name(), ".car")
+				logger.Infof("Reading car file %s with piece CID %s", entry.Name(), pieceCID)
+				err = contentProvider.AddCar(pieceCID, filepath.Join(carDir, entry.Name()))
+				if err != nil {
+					return errors.Wrapf(err, "cannot add car file %s", entry.Name())
+				}
 			}
-			pieceCID := strings.TrimSuffix(entry.Name(), ".car")
-			logger.Infof("Reading car file %s with piece CID %s", entry.Name(), pieceCID)
-			err = contentProvider.AddCar(pieceCID, filepath.Join(carDir, entry.Name()))
-			if err != nil {
-				return errors.Wrapf(err, "cannot add car file %s", entry.Name())
+			if strings.HasSuffix(entry.Name(), ".json") {
+				dealID := strings.TrimSuffix(entry.Name(), ".json")
+				logger.Infof("Reading deal file %s with deal ID %s", entry.Name(), dealID)
+				dealFile, err := os.ReadFile(filepath.Join(carDir, entry.Name()))
+				if err != nil {
+					return errors.Wrapf(err, "cannot read deal file %s", entry.Name())
+				}
+				var deal MarketDeal
+				err = json.Unmarshal(dealFile, &deal)
+				if err != nil {
+					return errors.Wrapf(err, "cannot unmarshal deal file %s", entry.Name())
+				}
+				contentProvider.mux.Lock()
+				contentProvider.deals[dealID] = deal
+				contentProvider.mux.Unlock()
 			}
 		}
 
@@ -268,7 +283,7 @@ func (c *ContentProvider) handleDeal(carDir string, deal *boostly.DealParams) er
 	if err != nil {
 		return errors.Wrapf(err, "cannot add car file %s", toName)
 	}
-	return nil
+	return c.ActivateDeal(carDir, deal)
 }
 
 type HttpRequest struct {

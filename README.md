@@ -61,3 +61,13 @@ You just need to send deals to `f02815405` and make sure `sim-sp` is running loc
 `f02815405` is a real miner on the chain with a real peer ID and libp2p address. The private key and the address is provided as the default value for `--key` and `--listen` options.
 
 When you make a deal with `f02815405`, it will lookup the multiaddr of the miner which will connect to `sim-sp` that runs locally.
+
+
+## How to work with Motion
+1. Copy Download docker-compose.yaml from https://github.com/filecoin-project/motion/blob/main/docker-compose.yml
+2. `docker compose -f ./docker-compose.yml -f ./sim-sp.yml up --build`
+3. POST a file to Motion and make sure it is larger than `MOTION_SINGULARITY_PACK_THRESHOLD` in `.env`
+4. Log from `singularity-dataset-worker` should show the data is being prepared
+5. Log from `singularity-deal-pusher` should push the deal to `sim-sp` at the start of the next minute
+6. Log from `sim-sp` should tell the deal proposal is accepted, CAR files downloaded and Deal activated
+7. Log from `singularity-deal-tracker` should show the deal is updated to `Active` state within the next minute

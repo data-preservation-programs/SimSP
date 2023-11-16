@@ -1,0 +1,53 @@
+# Download docker-compose.yaml from https://github.com/filecoin-project/motion/blob/main/docker-compose.yml
+# Use below command to run the docker compose
+# docker compose -f ./docker-compose.yml -f ./sim-sp.yml up --build
+# -f specifies the docker compose configuration file
+# --build will force rebuilding Motion if anything changes in the local code or Dockerfile
+# All the services will be running in host mode because the multiaddr of sim-sp is hardcoded to 127.0.0.1 on-chain
+version: '3.8'
+
+services:
+  db:
+    network_mode: host
+
+  singularity_admin_init:
+    network_mode: host
+    environment:
+      DATABASE_CONNECTION_STRING: postgres://${SINGULARITY_DB_USER:-postgres}:${SINGULARITY_DB_PASSWORD:-postgres}@127.0.0.1:5432/${SINGULARITY_DB_NAME:-singularity}
+
+  singularity_api:
+    network_mode: host
+    environment:
+      DATABASE_CONNECTION_STRING: postgres://${SINGULARITY_DB_USER:-postgres}:${SINGULARITY_DB_PASSWORD:-postgres}@127.0.0.1:5432/${SINGULARITY_DB_NAME:-singularity}
+
+  singularity_dataset_worker:
+    network_mode: host
+    environment:
+      DATABASE_CONNECTION_STRING: postgres://${SINGULARITY_DB_USER:-postgres}:${SINGULARITY_DB_PASSWORD:-postgres}@127.0.0.1:5432/${SINGULARITY_DB_NAME:-singularity}
+
+  singularity_deal_pusher:
+    network_mode: host
+    environment:
+      DATABASE_CONNECTION_STRING: postgres://${SINGULARITY_DB_USER:-postgres}:${SINGULARITY_DB_PASSWORD:-postgres}@127.0.0.1:5432/${SINGULARITY_DB_NAME:-singularity}
+
+  singularity_deal_tracker:
+    network_mode: host
+    command: run deal-tracker -i 1m
+    environment:
+      MARKET_DEAL_URL: http://127.0.0.1:7779/deals
+      DATABASE_CONNECTION_STRING: postgres://${SINGULARITY_DB_USER:-postgres}:${SINGULARITY_DB_PASSWORD:-postgres}@127.0.0.1:5432/${SINGULARITY_DB_NAME:-singularity}
+
+  singularity_content_provider:
+    network_mode: host
+    environment:
+      DATABASE_CONNECTION_STRING: postgres://${SINGULARITY_DB_USER:-postgres}:${SINGULARITY_DB_PASSWORD:-postgres}@127.0.0.1:5432/${SINGULARITY_DB_NAME:-singularity}
+
+  motion:
+    network_mode: host
+    entrypoint: motion --experimentalSingularityStore --experimentalRemoteSingularityAPIUrl=127.0.0.1:9090 --experimentalSingularityContentURLTemplate=${SINGULARITY_CONTENT_PROVIDER_DOMAIN:-http://127.0.0.1:7778}/piece/{PIECE_CID}
+
+  sim-sp:
+    network_mode: host
+    build: .
+    image: sim-sp
+    command: run --http :7779
