@@ -71,3 +71,4 @@ When you make a deal with `f02815405`, it will lookup the multiaddr of the miner
 5. Log from `singularity-deal-pusher` should push the deal to `sim-sp` at the start of the next minute
 6. Log from `sim-sp` should tell the deal proposal is accepted, CAR files downloaded and Deal activated
 7. Log from `singularity-deal-tracker` should show the deal is updated to `Active` state within the next minute
+8. After a minute, the local cached files will be cleaned up so retrieval will come directly from `sim-sp`

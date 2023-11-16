@@ -44,10 +44,15 @@ services:
 
   motion:
     network_mode: host
-    entrypoint: motion --experimentalSingularityStore --experimentalRemoteSingularityAPIUrl=127.0.0.1:9090 --experimentalSingularityContentURLTemplate=${SINGULARITY_CONTENT_PROVIDER_DOMAIN:-http://127.0.0.1:7778}/piece/{PIECE_CID} --singularityForcePackAfter=10s
+    entrypoint: motion --experimentalSingularityStore --experimentalRemoteSingularityAPIUrl=127.0.0.1:9090 --experimentalSingularityContentURLTemplate=${SINGULARITY_CONTENT_PROVIDER_DOMAIN:-http://127.0.0.1:7778}/piece/{PIECE_CID} --singularityForcePackAfter=10s --experimentalSingularityCleanupInterval=1m
 
   sim-sp:
     network_mode: host
     build: .
     image: sim-sp
     command: run --http :7779
+    volumes:
+      - sim-sp-volume:/app
+
+volumes:
+  sim-sp-volume:
